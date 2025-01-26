@@ -1,6 +1,7 @@
 const express = require('express'); // Importa o módulo Express
 const { Worker } = require('worker_threads'); // Importa Worker Threads para multithreading
 const path = require('path'); // Importa path para lidar com caminhos de arquivos
+const { MongoClient } = require('mongodb'); // Importa o MongoDB client
 
 const app = express(); // Inicializa o aplicativo Express
 const PORT = 3008; // Define a porta do servidor
@@ -12,6 +13,21 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 let activeWorker = null; // Variável global para o worker ativo
+
+// Configuração do MongoDB
+const uri = 'mongodb://localhost:27017'; // URL de conexão com o MongoDB
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+let db;
+
+async function connectToDatabase() {
+    try {
+        await client.connect();
+        db = client.db('bitcoinSearch'); // Nome do banco de dados
+        console.log('Connected to MongoDB');
+    } catch (error) {
+        console.error('Failed to connect to MongoDB', error);
+    }
+}
 
 // Função para iniciar a busca
 async function startSearch(req, res) {
@@ -35,29 +51,30 @@ async function startSearch(req, res) {
 
         activeWorker = worker; 
 
-        //activeWorker = worker; // Armazena o worker ativo
-
         // Recebe mensagens do Worker
-         // Gerencia mensagens recebidas do Worker
-         worker.on('message', (message) => {
+        worker.on('message', async (message) => {
             if (message.type === 'update') {
                 // Apenas exibe a mensagem no terminal
                 process.stdout.write(`${message.message}\r`);
-
             } else if (message.type === 'found') {
                 console.log('Private Key found: ', message.privateKey);
+                // Salva a chave privada encontrada no MongoDB
+                await db.collection('foundKeys').insertOne({ privateKey: message.privateKey, timestamp: new Date() });
                 // Envia a resposta HTTP e encerra o worker
                 res.json({ type: 'found', privateKey: message.privateKey });
                 worker.terminate();
+                activeWorker = null;
             } else if (message.type === 'finished') {
                 // Envia a resposta de finalização da busca
                 res.json({ type: 'finished', message: 'Search completed. No match found.' });
                 worker.terminate();
+                activeWorker = null;
             }
         });
 
         worker.on('error', (err) => {
             res.status(500).json({ type: 'error', message: err.message });
+            activeWorker = null;
         });
 
         // Loga quando o Worker finaliza
@@ -65,10 +82,12 @@ async function startSearch(req, res) {
             if (code !== 0) {
                 console.error(`Worker stopped with exit code ${code}`);
             }
+            activeWorker = null;
         });
 
     } catch (error) {
         res.status(500).json({ type: 'error', message: 'An error occurred while processing the request.' });
+        activeWorker = null;
     }
 }
 
@@ -89,7 +108,9 @@ app.post('/start-search', startSearch);
 // Rota para parar a busca
 app.post('/stop-search', stopSearch);
 
-// Inicia o servidor
-app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+// Conecta ao MongoDB e inicia o servidor
+connectToDatabase().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server is running at http://localhost:${PORT}`);
+    });
 });
