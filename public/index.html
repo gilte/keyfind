@@ -137,83 +137,90 @@
 <div id="status"></div>
 
 <script>
-  let isSearching = false;  // Variável para controlar o status de busca
-
-  // Manipula o envio do formulário de busca
-  document.getElementById('searchForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const rangeStart = document.getElementById('rangeStart').value.trim();
-      const rangeEnd = document.getElementById('rangeEnd').value.trim();
-      const targetHash = document.getElementById('targetHash').value.trim();
-      const minStep = document.getElementById('minStep').value.trim();
-      const maxStep = document.getElementById('maxStep').value.trim();
-
-      if (!rangeStart || !rangeEnd || !targetHash || !minStep || !maxStep) {
-          document.getElementById('status').textContent = 'All fields are required.';
-          return;
-      }
-
-      try {
-          isSearching = true;  // Atualiza o estado para indicar que a busca está em andamento
-          document.getElementById('startButton').disabled = true;
-          document.getElementById('stopButton').disabled = false;
-          document.getElementById('status').textContent = 'Starting search...';
-
-          const response = await fetch('/start-search', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                  rangeStart,
-                  rangeEnd,
-                  targetHash,
-                  minStep,
-                  maxStep
-              })
-          });
-
-          const data = await response.json();
-
-          if (data.type === 'found') {
-              alert(`Private key found: ${data.privateKey}`);
-          }
-
-          document.getElementById('status').textContent = 'Search completed or stopped.';
-          document.getElementById('startButton').disabled = false;
-          document.getElementById('stopButton').disabled = true;
-          isSearching = false;  // Atualiza o estado para indicar que a busca foi concluída
-
-      } catch (error) {
-          document.getElementById('status').textContent = 'An error occurred. Please try again.';
-          console.error(error);
-          isSearching = false;  // Atualiza o estado para indicar que a busca foi concluída
-          document.getElementById('startButton').disabled = false;
-          document.getElementById('stopButton').disabled = true;
-      }
-  });
-
-  // Manipula o clique no botão de parar
-  document.getElementById('stopButton').addEventListener('click', async function () {
-      if (isSearching) {
-          try {
-              const response = await fetch('/stop-search', { method: 'POST' });
-              const data = await response.json();
-
-              if (data.type === 'stopped') {
-                  document.getElementById('status').textContent = 'Search stopped.';
-                  document.getElementById('startButton').disabled = false;
-                  document.getElementById('stopButton').disabled = true;
-                  isSearching = false;  // Atualiza o estado para indicar que a busca foi parada
-              } else {
-                  document.getElementById('status').textContent = 'No active search to stop.';
-              }
-          } catch (error) {
-              document.getElementById('status').textContent = 'Failed to stop the search.';
-              console.error(error);
-          }
-      }
-  });
-</script>
+    let isSearching = false;  // Variável para controlar o status de busca
+  
+    // Manipula o envio do formulário de busca
+    document.getElementById('searchForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+  
+        const rangeStart = document.getElementById('rangeStart').value.trim();
+        const rangeEnd = document.getElementById('rangeEnd').value.trim();
+        const targetHash = document.getElementById('targetHash').value.trim();
+        const minStep = document.getElementById('minStep').value.trim();
+        const maxStep = document.getElementById('maxStep').value.trim();
+  
+        if (!rangeStart || !rangeEnd || !targetHash || !minStep || !maxStep) {
+            document.getElementById('status').textContent = 'All fields are required.';
+            return;
+        }
+  
+        try {
+            isSearching = true;  // Atualiza o estado para indicar que a busca está em andamento
+            document.getElementById('startButton').disabled = true;
+            document.getElementById('stopButton').disabled = false;
+            document.getElementById('status').textContent = 'Starting search...';
+  
+            const response = await fetch('/start-search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rangeStart,
+                    rangeEnd,
+                    targetHash,
+                    minStep,
+                    maxStep
+                })
+            });
+  
+            const data = await response.json();
+  
+            if (data.type === 'found') {
+                alert(`Private key found: ${data.privateKey}`);
+            }
+  
+            document.getElementById('status').textContent = 'Search completed or stopped.';
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('stopButton').disabled = true;
+            isSearching = false;  // Atualiza o estado para indicar que a busca foi concluída
+  
+        } catch (error) {
+            document.getElementById('status').textContent = 'An error occurred. Please try again.';
+            console.error(error);
+            isSearching = false;  // Atualiza o estado para indicar que a busca foi concluída
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('stopButton').disabled = true;
+        }
+    });
+  
+    // Manipula o clique no botão de parar
+    document.getElementById('stopButton').addEventListener('click', async function () {
+        if (isSearching) {
+            try {
+                const response = await fetch('/stop-search', { method: 'POST' });
+                const data = await response.json();
+  
+                if (data.type === 'stopped') {
+                    document.getElementById('status').textContent = 'Search stopped.';
+                    document.getElementById('startButton').disabled = false;
+                    document.getElementById('stopButton').disabled = true;
+                    isSearching = false;  // Atualiza o estado para indicar que a busca foi parada
+                } else {
+                    document.getElementById('status').textContent = 'No active search to stop.';
+                }
+            } catch (error) {
+                document.getElementById('status').textContent = 'Failed to stop the search.';
+                console.error(error);
+            }
+        }
+    });
+  
+    // Para a busca quando o usuário sai da página
+    window.addEventListener('beforeunload', async function (e) {
+        if (isSearching) {
+            await fetch('/stop-search', { method: 'POST' });
+        }
+    });
+  </script>
 
 </body>
 </html>
