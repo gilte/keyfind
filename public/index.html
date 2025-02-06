@@ -160,7 +160,7 @@
             document.getElementById('stopButton').disabled = false;
             document.getElementById('status').textContent = 'Starting search...';
   
-            const response = await fetch('/start-search', {
+            const response = await fetch('/.netlify/functions/start-search', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -196,7 +196,7 @@
     document.getElementById('stopButton').addEventListener('click', async function () {
         if (isSearching) {
             try {
-                const response = await fetch('/stop-search', { method: 'POST' });
+                const response = await fetch('/.netlify/functions/stop-search', { method: 'POST' });
                 const data = await response.json();
   
                 if (data.type === 'stopped') {

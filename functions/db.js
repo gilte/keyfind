@@ -1,6 +1,6 @@
 const { MongoClient } = require('mongodb');
 
-const uri = 'mongodb://localhost:27017'; // URL de conexão com o MongoDB
+const uri = 'mongodb+srv://elielgil18:pRtT6Zsd5okydIFx@users.rzq07.mongodb.net/'; // String de conexão do MongoDB Atlas
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 let db;
 

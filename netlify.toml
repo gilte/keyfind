@@ -1,0 +1,5 @@
+[build]
+  functions = "functions" # Pasta onde as funções Lambda estão
+
+[[plugins]]
+  package = "@netlify/plugin-functions-core"
