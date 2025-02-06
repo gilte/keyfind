@@ -12,7 +12,7 @@ app.use(express.json());
 // Servir arquivos estáticos (frontend)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rota para iniciar a busca
+// Rota para iniciar a buscan
 app.post('/start-search', handleStartSearch);
 
 // Rota para parar a busca

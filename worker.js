@@ -43,7 +43,7 @@ while (true) {
         });
 
         // 🔥 Apenas verifica o targetHash se começar com "7", senão apenas continua a busca.
-        if (ripemd160Hash.startsWith('9')) {
+        if (ripemd160Hash.startsWith('7')) {
             if (ripemd160Hash === targetHash) {
                 parentPort.postMessage({ type: 'found', privateKey: privateKeyHex });
                 break;

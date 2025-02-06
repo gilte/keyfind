@@ -1,4 +1,0 @@
-[build]
-  functions = "functions" # Pasta onde as funções Lambda estão
-
-publish = "public" 
