@@ -4,7 +4,7 @@ const { connectToDatabase } = require('./db');
 const { handleStartSearch, handleStopSearch } = require('./controller');
 
 const app = express(); // Inicializa o aplicativo Express
-const PORT = 3008; // Define a porta do servidor
+const PORT = 3000; // Define a porta do servidor
 
 // Middleware para interpretar JSON no corpo das requisiçõe
 app.use(express.json());
