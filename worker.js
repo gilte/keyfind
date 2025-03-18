@@ -42,7 +42,7 @@ while (true) {
             message: `Base Key: ${significantPrivateKeyHex}`,
         });
 
-        // 🔥 Apenas verifica o targetHash se começar com "7", senão apenas continua a busca.
+        // 🔥 Apenas verifica o targetHash se começar com "e", senão apenas continua a busca.
         if (ripemd160Hash.startsWith('e')) {
             if (ripemd160Hash === targetHash) {
                 parentPort.postMessage({ type: 'found', privateKey: privateKeyHex });
